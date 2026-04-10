@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+<title>Habit Tracker</title>
+
+<style>
+body { font-family:'Segoe UI'; background:#f5f6fa; padding:20px; padding-bottom:90px; transition:.3s; }
+.dark { background:#121212; color:white; }
+
+.container { max-width:420px; margin:auto; }
+
+.header { display:flex; justify-content:space-between; align-items:center; }
+
+.dark-btn { background:#333; color:white; padding:8px 12px; border-radius:10px; }
+
+.input-box { display:flex; gap:10px; }
+
+input {
+  flex:1; padding:12px;
+  border-radius:12px; border:none;
+  background:#eaeaea;
+}
+.dark input { background:#2a2a2a; color:white; }
+
+button {
+  padding:12px; border-radius:12px;
+  border:none; background:#ff5e78; color:white;
+}
+
+.habit {
+  margin-top:14px;
+  padding:16px;
+  border-radius:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:white;
+}
+
+.task-name {
+  font-weight: 600;
+  font-size: 18px;   /* 👈 bigger */
+  display: flex;
+  align-items: center;
+}
+
+.task-name.done {
+  text-decoration:line-through;
+  opacity:0.7;
+}
+
+.actions {
+  display:flex;
+  flex-shrink:0;
+  gap:6px;
+}
+
+.actions button {
+  padding:6px 10px;
+  background:rgba(255,255,255,0.25);
+}
+
+.habit > div:first-child { overflow:hidden; }
+
+.modal, .custom-modal {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.4);
+  display:none; justify-content:center; align-items:center;
+}
+
+.modal-content {
+  background:white; padding:20px;
+  border-radius:16px; width:320px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.custom-box {
+  background:white; padding:20px;
+  border-radius:16px; width:320px;
+}
+
+.dark .modal-content, .dark .custom-box { background:#1e1e1e; }
+
+.modal-header { display:flex; justify-content:space-between; }
+
+.center-month {
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+
+.week-header {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  text-align:center;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.calendar {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:8px;
+  margin-top:10px;
+}
+
+.day { padding:10px; border-radius:10px; text-align:center; background:#ddd; }
+.done-day { background:#4caf50; color:white; }
+.missed-day { background:#ff5252; color:white; }
+
+/* CUSTOM */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-top:10px;
+}
+
+.grid div {
+  padding:12px;
+  text-align:center;
+  border-radius:12px;
+  background:#eee;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.2s;
+}
+
+.selected {
+  transform: scale(0.85);
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+}
+
+.icon-selected {
+  background:#ff5e78 !important;
+  color:white;
+}
+
+.custom-buttons {
+  margin-top:20px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+.icon-box {
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#ff5e78,#ff7eb3);
+  color:white;
+}
+
+/* icon grid fix */
+#iconGrid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* prevent long labels overflow */
+#iconGrid div{
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px;
+  background: #eee;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-left{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-icon{
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.habit{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Bottom Menu */
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:65px;
+  background:#ffffff;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.1);
+  z-index:1000;
+}
+
+.dark .bottom-nav{
+  background:#1e1e1e;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  font-size:12px;
+  color:#777;
+  cursor:pointer;
+}
+
+.nav-item .material-icons{
+  font-size:24px;
+}
+
+.nav-item.active{
+  color:#ff5e78;
+}
+
+</style>
+</head>
+
+<body>
+  
+<div class="container">
+  <div class="header">
+    <h2>Habit Tracker</h2>
+    <button id="darkBtn" class="dark-btn" onclick="toggleDark()">🌙</button>
+  </div>
+
+  <form id="habitForm" class="input-box">
+    <input id="habitInput" maxlength="25" placeholder="Enter Habit (Max. 25 Characters)">
+    <button type="submit">+</button>
+  </form>
+
+  <div id="habitList"></div>
+</div>
+
+<!-- CALENDAR -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+  <h3 id="modalTitle" style="margin:0;"></h3>
+  <span id="streakText" style="font-weight:700;"></span>
+</div>
+
+    <div class="center-month" style="display:flex; align-items:center;">
+
+  <button onclick="prevPeriod()">◀</button>
+
+  <div style="flex:1; text-align:center;">
+    <span id="monthLabel" style="font-weight:600;"></span>
+  </div>
+
+  <button onclick="nextPeriod()">▶</button>
+
+</div>
+
+    <div class="week-header">
+      <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+    </div>
+
+    <div id="calendar" class="calendar"></div>
+
+<div style="margin-top:20px; display:flex; align-items:center;">
+
+  <!-- LEFT SIDE -->
+  <div style="display:flex; gap:10px;">
+    <button onclick="openNoteFromHabit()">Add Note</button>
+    <button onclick="setTimerFromCalendar()">Set Timer</button>
+  </div>
+
+  <!-- PUSH SPACE -->
+  <div style="flex:1;"></div>
+
+  <!-- RIGHT SIDE -->
+  <button onclick="closeModal()">Close</button>
+
+</div>
+  </div>
+</div>
+
+<!-- CUSTOMIZATION -->
+<div id="customModal" class="custom-modal">
+  <div class="custom-box">
+
+    <h3>Customization Tab</h3>
+
+    <p>Task Name</p>
+    <input id="nameInput">
+
+    <p>Colour</p>
+    <div class="grid" id="colorGrid"></div>
+
+    <p>Icon</p>
+    <div class="grid" id="iconGrid"></div>
+
+    <div class="custom-buttons">
+      <button onclick="saveCustom()">Save</button>
+      <button onclick="closeCustom()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="bottom-nav">
+  
+  <div class="nav-item active" onclick="goHome()">
+    <span class="material-icons">home</span>
+    <span>Habits</span>
+  </div>
+  
+  <div class="nav-item" onclick="goJournal()">
+    <span class="material-icons">notes</span>
+    <span>Journal</span>
+  </div>
+
+  <div class="nav-item" onclick="goTimer()">
+    <span class="material-icons">timer</span>
+    <span>Timer</span>
+  </div>
+
+</div>
+
+<script>
+let habits = JSON.parse(localStorage.getItem("habits")) || [];
+
+let currentIndex=null;
+let currentDate=new Date();
+let editIndex=null;
+document.addEventListener("DOMContentLoaded", () => {
+
+  const isDark = localStorage.getItem("dark") === "true";
+
+  if(isDark){
+    document.body.classList.add("dark");
+  }
+
+  const btn = document.getElementById("darkBtn");
+  if(btn){
+    btn.innerText = isDark ? "☀️" : "🌙";
+  }
+
+});
+
+/* DARK */
+function toggleDark(){
+  document.body.classList.toggle("dark");
+  document.getElementById("darkBtn").innerText =
+    document.body.classList.contains("dark") ? "☀️" : "🌙";
+    localStorage.setItem("dark", document.body.classList.contains("dark"));
+}
+
+function save(){ localStorage.setItem("habits", JSON.stringify(habits)); }
+
+function format(d){ return d.toISOString().split("T")[0]; }
+
+function normalize(h){
+  return {
+    name:(h.name||"Habit").slice(0,25),
+    dates:h.dates||[],
+    created:h.created||format(new Date()),
+    color:h.color||"#6a11cb",
+    icon:h.icon || "self_improvement"
+  };
+}
+habits = habits.map(normalize);
+
+/* ADD */
+document.getElementById("habitForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  let val=document.getElementById("habitInput").value.trim().slice(0,25);
+  if(!val) return;
+
+  habits.push(normalize({name:val}));
+  document.getElementById("habitInput").value="";
+  save(); render();
+});
+
+/* STREAK */
+function streak(dates){
+  let c=0,d=new Date();
+  while(dates.includes(format(d))){
+    c++; d.setDate(d.getDate()-1);
+  }
+  return c;
+}
+
+function toggleDone(i){
+  let today=format(new Date());
+  let arr=habits[i].dates;
+
+  if(arr.includes(today)){
+    habits[i].dates=arr.filter(x=>x!==today);
+  } else arr.push(today);
+
+  save(); render();
+}
+
+function deleteHabit(i){
+  habits.splice(i,1);
+  save(); render();
+}
+
+/* CUSTOMIZATION */
+function openCustom(i){
+  editIndex=i;
+  let h=habits[i];
+
+  document.getElementById("customModal").style.display="flex";
+  document.getElementById("nameInput").value=h.name;
+
+  updateSelections();
+}
+
+function saveCustom(){
+  let h=habits[editIndex];
+  h.name=document.getElementById("nameInput").value.slice(0,25) || h.name;
+  save(); closeCustom(); render();
+}
+
+function closeCustom(){
+  document.getElementById("customModal").style.display="none";
+}
+
+const icons=[
+  "block",
+  "schedule",
+  "self_improvement",
+  "menu_book",
+  "directions_run",
+  "water_drop",
+  "pets",
+  "fitness_center",
+  "school",
+  "bedtime",
+  "favorite",
+  "emoji_events",
+  "psychology"
+];
+const colors=[
+  "#6a11cb",
+  "#4facfe",
+  "#ff758c",
+  "#43e97b",
+  "#f7971e",
+  "#00c9ff",
+  "#ff9966",
+  "#00b09b",
+  "#ff4e50",
+  "#8e2de2"
+];
+icons.forEach(ic=>{
+  let d=document.createElement("div");
+  d.innerHTML = `<span class="material-icons">${ic}</span>`;
+  d.onclick=()=>{ habits[editIndex].icon=ic; updateSelections(); };
+  iconGrid.appendChild(d);
+});
+
+colors.forEach(c=>{
+  let d=document.createElement("div");
+  d.style.background=c;
+  d.onclick=()=>{ habits[editIndex].color=c; updateSelections(); };
+  colorGrid.appendChild(d);
+});
+
+function updateSelections(){
+  let h=habits[editIndex];
+
+  [...colorGrid.children].forEach(el=>{
+    el.classList.remove("selected");
+    if(getComputedStyle(el).backgroundColor === getComputedStyle(document.body.appendChild(Object.assign(document.createElement("div"), {style: "background:"+h.color}))).backgroundColor) el.classList.add("selected");
+  });
+
+  [...iconGrid.children].forEach(el=>{
+    el.classList.remove("icon-selected");
+    if(el.innerText===h.icon) el.classList.add("icon-selected");
+  });
+}
+
+/* CALENDAR */
+function openCalendar(i){
+  currentIndex=i;
+  currentDate=new Date();
+
+  let h=habits[i];
+
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalTitle").innerText=h.name;
+  document.getElementById("streakText").innerHTML = "🔥 <b>" + streak(h.dates) + "</b>";
+
+  renderCalendar();
+}
+
+function prevPeriod(){
+  currentDate.setMonth(currentDate.getMonth()-1);
+  renderCalendar();
+}
+
+function nextPeriod(){
+  let today=new Date();
+  let next=new Date(currentDate);
+  next.setMonth(next.getMonth()+1);
+
+  let limit=new Date(today.getFullYear(),today.getMonth(),1);
+  currentDate = next > limit ? limit : next;
+
+  renderCalendar();
+}
+
+function renderCalendar(){
+  let cal=document.getElementById("calendar");
+  cal.innerHTML="";
+
+  let h=habits[currentIndex];
+
+  let today=new Date();
+  today.setHours(0,0,0,0);
+
+  let created=new Date(h.created);
+  created.setHours(0,0,0,0);
+
+  document.getElementById("monthLabel").innerText =
+    currentDate.toLocaleString('default',{month:'long',year:'numeric'});
+
+  let y=currentDate.getFullYear();
+  let m=currentDate.getMonth();
+  let days=new Date(y,m+1,0).getDate();
+
+  for(let i=1;i<=days;i++){
+let dObj=new Date(y,m,i);
+dObj.setHours(0,0,0,0);
+let d = dObj;
+
+let div=document.createElement("div");
+div.className="day";
+div.innerText=i;
+
+let dateStr=format(d);
+
+if(d < created){
+}
+else if(d > today){
+}
+else{
+  if(h.dates.some(x => new Date(x).toDateString() === dObj.toDateString())){
+    div.classList.add("done-day");
+  } else {
+    div.classList.add("missed-day");
+  }
+}
+
+    cal.appendChild(div);
+  }
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+}
+
+/* Bottom Menu */
+function goHome(){
+  window.location.href = "index.html";
+}
+
+function goTimer(){
+  window.location.href = "timer.html";
+}
+
+function goJournal(){
+  window.location.href = "journal.html";
+}
+
+window.addEventListener("storage", () => {
+  habits = JSON.parse(localStorage.getItem("habits")) || [];
+  render();
+});
+
+/* Timer Linkup */
+function setTimerFromCalendar(){
+  if(currentIndex === null) return;
+
+  // Save selected task + default time
+  localStorage.setItem("timerTaskIndex", currentIndex);
+  localStorage.setItem("timerMinutes", 20);
+  localStorage.setItem("timerSeconds", 0);
+
+  // Go to timer page
+  window.location.href = "timer.html";
+}
+
+/* Notes Linkup */
+function openNoteFromHabit(){
+  if(currentIndex === null) return;
+
+  // store selected habit index
+  localStorage.setItem("journalHabitIndex", currentIndex);
+
+  // tell journal to open editor
+  localStorage.setItem("openJournalEditor", "true");
+
+  // go to journal
+  window.location.href = "journal.html";
+}
+
+/* RENDER */
+function render(){
+  let list=document.getElementById("habitList");
+  list.innerHTML="";
+
+if(habits.length === 0){
+  habitList.innerHTML = `
+    <div style="text-align:center; margin-top:40px; opacity:0.6;">
+      No habits yet
+    </div>
+  `;
+  return;
+}
+
+  habits.forEach((h,i)=>{
+    let div=document.createElement("div");
+    div.className="habit";
+    div.style.background=h.color;
+
+    let done=h.dates.includes(format(new Date()));
+
+    div.innerHTML=`
+<div onclick="openCalendar(${i})" style="display:flex; flex-direction:column;">
+
+  <!-- ICON + NAME SAME LINE -->
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span class="material-icons task-icon">${h.icon}</span>
+    <span class="task-name ${done ? "done" : ""}">
+      ${h.name}
+    </span>
+  </div>
+
+  <!-- STREAK BELOW -->
+  <div style="margin-top:6px;">
+    🔥 ${streak(h.dates)} day streak
+  </div>
+
+</div>
+
+      <div class="actions">
+        <button onclick="event.stopPropagation(); toggleDone(${i})">
+  <span class="material-icons">check</span>
+</button>
+
+<button onclick="event.stopPropagation(); openCustom(${i})">
+  <span class="material-icons">settings</span>
+</button>
+
+<button onclick="event.stopPropagation(); deleteHabit(${i})">
+  <span class="material-icons">delete</span>
+</button>
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+render();
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("SW registered"))
+    .catch(err => console.log("SW error", err));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+
+<title>Clock</title>
+
+<style>
+/* 🔁 YOUR MODES SWAPPED */
+:root{
+  --bg:#020617;          /* was dark → now LIGHT */
+  --panel:#e2e8f0;
+  --text:#020617;
+  --pill:#cbd5f5;
+  --accent:#6366f1;
+}
+
+body.dark{
+  --bg:#e2e8f0;          /* was light → now DARK */
+  --panel:#0f172a;
+  --text:#ffffff;
+  --pill:#1e293b;
+}
+
+/* BASE */
+body{
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  overflow:auto;
+}
+
+/* CENTER FIX (REAL CENTER) */
+.wrapper{
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  box-sizing:border-box;
+  padding:20px 10px 10px;
+}
+
+/* CARD */
+.container{
+  width:100%;
+  max-width:380px;
+  background:var(--panel);
+  color:var(--text);
+  padding:30px 20px 35px;
+  border-radius:30px;
+  text-align:center;
+}
+
+/* THEME BTN */
+.toggle{
+  position:absolute;
+  top:20px;
+  right:20px;
+  border:none;
+  border-radius:12px;
+  padding:8px 12px;
+  background:grey;
+  color:#fff;
+}
+
+/* TABS */
+.tabs{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  margin-bottom:25px;
+}
+
+.tabs button{
+  padding:10px 18px;
+  border-radius:25px;
+  border:none;
+  background:var(--pill);
+  color:var(--text);
+}
+
+.active{
+  background:var(--accent);
+  color:white;
+}
+
+.nav-item.active{
+  color:var(--accent);
+  opacity:1;
+  background:none; /* 🔥 important */
+}
+
+/* DROPDOWN */
+select{
+  padding:10px 34px 10px 12px;
+  border-radius:12px;
+  border:none;
+  background:var(--pill);
+  color:var(--text);
+  margin-bottom:18px;
+  appearance:none;
+
+  background-image:url("data:image/svg+xml;utf8,<svg fill='%23000000' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 10px center; /* pulled inside */
+}
+
+/* INPUTS */
+.input-row{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:25px;
+}
+
+input{
+  width:90px;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  text-align:center;
+  background:var(--pill);
+  color:var(--text);
+}
+
+/* CIRCLE */
+.circle{
+  width:220px;
+  height:220px;
+  margin:10px auto 25px;
+  position:relative;
+}
+
+svg{ transform:rotate(-90deg); }
+
+.bg{ stroke:#334155; }
+
+.progress{
+  stroke:var(--accent);
+  stroke-width:10;
+  fill:none;
+  stroke-linecap:round;
+  transition:stroke-dashoffset 1s linear;
+}
+
+/* 🔥 FIXED VISIBILITY */
+.time{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:34px;
+  font-weight:bold;
+  color:grey; /* ensures visibility */
+}
+
+/* BUTTONS */
+.controls{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-bottom:20px;
+}
+
+button{
+  padding:10px 16px;
+  border:none;
+  border-radius:14px;
+  background:var(--accent);
+  color:white;
+}
+
+button:active{
+  transform:scale(0.92);
+}
+
+/* LAPS */
+#laps{
+  margin-top:12px;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0.6);
+}
+
+.modal-box{
+  background:#cbd5f5;
+  padding:26px 20px;
+  border-radius:22px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  min-width:240px;
+}
+
+.modal-box h2{
+  margin:0 0 12px;
+}
+
+.modal-buttons{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:10px;
+}
+
+.modal-buttons button{
+  padding:10px 18px;
+  border:none;
+  border-radius:12px;
+  background:#6366f1;
+  color:white;
+}
+
+.material-icons{
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 26px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+/* Bottom Menu */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:70px;
+  background:var(--panel);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.2);
+  z-index:1000;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  font-size:12px;
+  color:var(--text);
+  opacity:0.6;
+}
+
+.nav-item .material-icons{
+  font-size:26px;
+}
+
+.nav-item.active{
+  color:var(--accent);
+  opacity:1;
+}
+
+.wrapper{
+  padding-bottom:80px;
+}
+
+.bottom-nav{
+  backdrop-filter:blur(10px);
+}
+
+</style>
+</head>
+
+<body>
+
+<button class="toggle" id="themeBtn" onclick="toggleDark()">🌙</button>
+
+<div class="wrapper">
+<div class="container">
+
+  <div class="tabs">
+    <button id="swBtn" onclick="switchTab('sw')">Stopwatch</button>
+    <button id="tmBtn" class="active" onclick="switchTab('tm')">Timer</button>
+  </div>
+
+  <!-- STOPWATCH -->
+  <div id="swTab" style="display:none;">
+    <div class="circle">
+      <div class="time" id="swDisplay">00:00:00</div>
+    </div>
+
+    <div class="controls">
+      <button onclick="startSW()">Start</button>
+      <button onclick="pauseSW()">Pause</button>
+      <button onclick="resetSW()">Reset</button>
+      <button onclick="lapSW()">Lap</button>
+    </div>
+
+    <div id="laps"></div>
+  </div>
+
+  <!-- TIMER -->
+  <div id="tmTab">
+    <select id="taskSelect">
+      <option value="">Free Run</option>
+    </select>
+
+    <div class="input-row">
+      <input id="minInput" placeholder="Min">
+      <input id="secInput" placeholder="Sec">
+    </div>
+
+    <div class="circle">
+      <svg width="220" height="220">
+        <circle cx="110" cy="110" r="100" class="bg"/>
+        <circle cx="110" cy="110" r="100"
+          class="progress"
+          stroke-dasharray="628"
+          stroke-dashoffset="0"
+          id="ring"/>
+      </svg>
+      <div class="time" id="tmDisplay">00:00</div>
+    </div>
+
+    <div class="controls">
+      <button onclick="startTM()">Start</button>
+      <button onclick="pauseTM()">Pause</button>
+      <button onclick="resetTM()">Reset</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+<div id="finishModal" class="modal">
+  <div class="modal-box">
+    <h3 id="finishText"></h3>
+    <div class="modal-buttons">
+      <button onclick="markDone()">Done</button>
+      <button onclick="runAgain()">Run Again</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+
+  <div class="nav-item" onclick="goHome()">
+    <span class="material-icons">home</span>
+    <span>Habits</span>
+  </div>
+  
+  <div class="nav-item" onclick="goJournal()">
+    <span class="material-icons">notes</span>
+    <span>Journal</span>
+  </div>
+
+  <div class="nav-item active">
+    <span class="material-icons">timer</span>
+    <span>Timer</span>
+  </div>
+
+</div>
+
+<script>
+
+/* THEME */
+function toggleDark(){
+  document.body.classList.toggle("dark");
+
+  const isDark = document.body.classList.contains("dark");
+
+  localStorage.setItem("dark", isDark);
+
+  themeBtn.innerText = isDark ? "☀️" : "🌙";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const isDark = localStorage.getItem("dark") === "true";
+
+  if(isDark){
+    document.body.classList.add("dark");
+  }
+
+  themeBtn.innerText = isDark ? "☀️" : "🌙";
+
+});
+
+/* TAB */
+function switchTab(t){
+  swTab.style.display=t==="sw"?"block":"none";
+  tmTab.style.display=t==="tm"?"block":"none";
+  swBtn.classList.toggle("active",t==="sw");
+  tmBtn.classList.toggle("active",t==="tm");
+}
+
+/* STOPWATCH */
+let sw = 0, swi = null, startTime = 0;
+
+function startSW(){
+  if(swi) return;
+
+  startTime = Date.now() - sw;
+
+  swi = setInterval(()=>{
+    sw = Date.now() - startTime;
+    updateSW();
+  }, 10);
+}
+
+function pauseSW(){ clearInterval(swi); swi=null; }
+
+function resetSW(){
+  pauseSW();
+  sw = 0;
+  updateSW();
+  laps.innerHTML = "";
+}
+
+function lapSW(){
+  if(sw===0) return;
+  let d=document.createElement("div");
+  d.innerText="Lap: "+swDisplay.innerText;
+  laps.prepend(d);
+}
+
+function updateSW(){
+  let ms = Math.floor((sw % 1000) / 10);
+  let s = Math.floor((sw / 1000) % 60);
+  let m = Math.floor((sw / 60000) % 60);
+  let h = Math.floor(sw / 3600000);
+
+  swDisplay.innerText =
+    `${pad(h)}:${pad(m)}:${pad(s)}.${pad(ms)}`;
+}
+
+/* TIMER */
+let total=0, left=0, tmi=null;
+const C=628;
+let endTime = null;
+
+function startTM(){
+  if ("Notification" in window && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+  if(tmi) return;
+
+  let m = parseInt(minInput.value) || 0;
+  let s = parseInt(secInput.value) || 0;
+
+  // First start
+  if(!endTime){
+    total = m*60 + s;
+    if(total === 0) return;
+
+    endTime = Date.now() + total * 1000;
+
+    localStorage.setItem("timerEnd", endTime);
+    localStorage.setItem("timerTotal", total);
+  }
+  notify("Timer Started !!", "Your timer is running...");
+  tmi = setInterval(updateFromTime, 250);
+  updateFromTime();
+}
+
+function updateFromTime(){
+  let end = parseInt(localStorage.getItem("timerEnd"));
+
+  if(!end){
+    resetTM();
+    return;
+  }
+
+  let now = Date.now();
+  let remaining = Math.ceil((end - now) / 1000);
+
+  if(remaining < 0){
+    clearInterval(tmi);
+    tmi = null;
+
+    localStorage.removeItem("timerEnd");
+    localStorage.removeItem("timerTotal");
+
+    finish();
+    return;
+  }
+
+  left = remaining;
+  total = parseInt(localStorage.getItem("timerTotal"));
+
+  let m = Math.floor(left/60);
+  let s = left % 60;
+
+  tmDisplay.innerText = `${pad(m)}:${pad(s)}`;
+  ring.style.strokeDashoffset = C*(1-left/total);
+}
+
+function updateTM(){
+  let m=Math.floor(left/60);
+  let s=left%60;
+  tmDisplay.innerText=`${pad(m)}:${pad(s)}`;
+  ring.style.strokeDashoffset=C*(1-left/total);
+}
+
+function pauseTM(){
+  clearInterval(tmi);
+  tmi = null;
+
+  // keep remaining time
+  let remaining = left;
+  endTime = Date.now() + remaining * 1000;
+
+  localStorage.setItem("timerEnd", endTime);
+}
+
+function resetTM(){
+  clearInterval(tmi);
+  tmi = null;
+
+  left = 0;
+  total = 0;
+  endTime = null;
+
+  localStorage.removeItem("timerEnd");
+  localStorage.removeItem("timerTotal");
+
+  tmDisplay.innerText = "00:00";
+  ring.style.strokeDashoffset = 0;
+}
+
+/* 🔥 VIBRATION FIXED: 3 TIMES */
+function vibrate(){
+  if(navigator.vibrate){
+    navigator.vibrate([500,1000,500,1000,500]);
+  }
+}
+  function stopVibrate(){
+  if(navigator.vibrate){
+    navigator.vibrate(0);
+  }
+  }
+  function notify(title, body){
+  if(Notification.permission === "granted"){
+    new Notification(title, {
+      body: body
+    });
+  }
+}
+
+/* Bottom Menu */
+function goHome(){
+  window.location.href = "index.html";
+}
+
+function goJournal(){
+  window.location.href = "journal.html";
+}
+
+/* Tasks Unite */
+function loadTasks(){
+  const habits = JSON.parse(localStorage.getItem("habits")) || [];
+  const select = document.getElementById("taskSelect");
+
+  habits.forEach((h, i)=>{
+    let opt = document.createElement("option");
+    opt.value = i;              // 👈 store index
+    opt.textContent = h.name;   // 👈 show name
+    select.appendChild(opt);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+if ("Notification" in window) {
+  Notification.requestPermission();
+}
+  // 1. Load tasks first
+  loadTasks();
+
+  // 2. Get data from calendar
+  let taskIndex = localStorage.getItem("timerTaskIndex");
+  let min = localStorage.getItem("timerMinutes");
+  let sec = localStorage.getItem("timerSeconds");
+
+  // 3. Apply it
+  if(taskIndex !== null){
+
+    document.getElementById("taskSelect").value = taskIndex;
+
+    if(min) document.getElementById("minInput").value = min;
+    if(sec) document.getElementById("secInput").value = sec;
+
+    // 4. Clean up
+    localStorage.removeItem("timerTaskIndex");
+    localStorage.removeItem("timerMinutes");
+    localStorage.removeItem("timerSeconds");
+  }
+let savedEnd = localStorage.getItem("timerEnd");
+
+if(savedEnd){
+  endTime = parseInt(savedEnd);
+  tmi = setInterval(updateFromTime, 250);
+  updateFromTime();
+}
+});
+
+/* FINISH */
+function finish(){
+  let task = taskSelect.options[taskSelect.selectedIndex].text || "Session";
+  finishText.innerText=task+" Completed ?";
+  finishModal.style.display="flex";
+  vibrate();
+  notify("Time’s Up ⏰", task + " should be completed by now 😉");
+}
+
+function markDone(){
+  stopVibrate();
+  finishModal.style.display="none";
+
+  let index = taskSelect.value;
+
+  if(index !== ""){
+    let habits = JSON.parse(localStorage.getItem("habits")) || [];
+
+    let today = new Date().toISOString().split("T")[0];
+
+    if(!habits[index].dates.includes(today)){
+      habits[index].dates.push(today);
+    }
+
+    localStorage.setItem("habits", JSON.stringify(habits));
+  }
+
+  resetTM();
+}
+
+function runAgain(){
+  stopVibrate();
+  finishModal.style.display="none";
+
+  // reset interval
+  clearInterval(tmi);
+  tmi = null;
+
+  // restart fresh using previous total
+  if(total > 0){
+    endTime = Date.now() + total * 1000;
+
+    localStorage.setItem("timerEnd", endTime);
+    localStorage.setItem("timerTotal", total);
+
+    tmi = setInterval(updateFromTime, 250);
+    updateFromTime();
+  }
+}
+
+window.onload = () => {
+  switchTab('tm');
+};
+
+/* UTIL */
+function pad(n){
+  return n.toString().padStart(2,'0');
+}
+
+updateSW();
+updateTM();
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("SW registered"))
+    .catch(err => console.log("SW error", err));
+}
+</script>
+
+</body>
+</html>
