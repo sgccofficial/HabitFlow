@@ -404,20 +404,19 @@ function rebindEditorCheckboxes(){
   });
 }
 
-/* INPUT */
-document.getElementById("editor").addEventListener("beforeinput", function(e){
+/* INPUT FIX (stable typing) */
+document.getElementById("editor").addEventListener("input", function(){
+  const selection = window.getSelection();
+  if(!selection.rangeCount) return;
 
-  // ✅ allow space (FIXES KEYBOARD BUG)
-  if(e.data === " " || e.data === null) return;
+  const range = selection.getRangeAt(0);
+  let node = range.startContainer;
 
-  if(e.data && e.inputType === "insertText"){
-    e.preventDefault();
+  // move up to element if text node
+  if(node.nodeType === 3) node = node.parentElement;
 
-    document.execCommand(
-      "insertHTML",
-      false,
-      `<span style="color:${currentColor}">${e.data}</span>`
-    );
+  if(node){
+    node.style.color = currentColor;
   }
 });
 
