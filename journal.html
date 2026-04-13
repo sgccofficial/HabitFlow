@@ -658,10 +658,6 @@ function toggleCreate(){
   card.style.display = createOpen ? "block" : "none";
 }
 
-/* INIT */
-loadHabits();
-render();
-
 /* AUTO OPEN FROM HABIT PAGE */
 window.addEventListener("load", () => {
 
@@ -686,6 +682,9 @@ window.addEventListener("load", () => {
   }
 
 });
+  /* INIT */
+loadHabits();
+render();
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js")
     .then(() => console.log("SW registered"))
