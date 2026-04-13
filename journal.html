@@ -391,37 +391,45 @@ function loadHabits(){
   });
 }
 
-/* COLOR */
+  /* Select */
+let savedRange = null;
+  const editor = document.getElementById("editor");
+
+editor.addEventListener("keyup", saveSelection);
+editor.addEventListener("mouseup", saveSelection);
+
+function saveSelection(){
+  const selection = window.getSelection();
+  if(selection.rangeCount > 0){
+    savedRange = selection.getRangeAt(0);
+  }
+}
+  
+  /* COLOR */
 function setColor(el, color){
   document.querySelectorAll(".color").forEach(c=>c.classList.remove("active"));
   el.classList.add("active");
 
-  const selection = window.getSelection();
+  if(savedRange && !savedRange.collapsed){
+    const span = document.createElement("span");
+    span.style.color = color;
 
-  // ✅ If user selected text → color only that
-  if(selection.rangeCount){
-    const range = selection.getRangeAt(0);
+    span.appendChild(savedRange.extractContents());
+    savedRange.insertNode(span);
 
-    if(!range.collapsed){
-      const span = document.createElement("span");
-      span.style.color = color;
+    // reset selection
+    const selection = window.getSelection();
+    selection.removeAllRanges();
 
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
+    const newRange = document.createRange();
+    newRange.setStartAfter(span);
+    newRange.collapse(true);
+    selection.addRange(newRange);
 
-      // move cursor after colored text
-      selection.removeAllRanges();
-      const newRange = document.createRange();
-      newRange.setStartAfter(span);
-      newRange.collapse(true);
-      selection.addRange(newRange);
-
-      return;
-    }
+    savedRange = null;
+  } else {
+    currentColor = color;
   }
-
-  // fallback (no selection)
-  currentColor = color;
 }
 function rebindEditorCheckboxes(){
   const editor = document.getElementById("editor");
