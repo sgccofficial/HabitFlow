@@ -653,6 +653,668 @@ function rebindEditorCheckboxes(){
       task.innerText = habits[e.habit]?.name;
       task.style.background = habits[e.habit]?.color;
     } else {
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Segoe UI';
+  background:#f5f6fa;
+  padding-bottom:120px;
+  overflow-x: hidden;
+  position: relative;
+}
+body.dark{
+  background:#0b1020;
+  color:white;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+}
+
+.header h2{
+  margin:0;
+  font-weight:600;
+}
+
+/* ENTRY */
+.entry{
+  margin:14px 16px;
+  padding:16px;
+  border-radius:18px;
+  background:#fff;
+}
+body.dark .entry{background:#151a2f;}
+
+.content{
+  margin-bottom:14px;
+  line-height:1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* META */
+.meta{
+  display:flex;
+  gap:10px;
+}
+.task{
+  padding:6px 12px;
+  border-radius:12px;
+  font-size:12px;
+  color:white;
+}
+.time{
+  padding:6px 12px;
+  border-radius:12px;
+  font-size:12px;
+  background:#ddd;
+}
+body.dark .time{background:#2a3355;color:white;}
+
+/* FAB */
+.fab{
+  position: fixed !important;
+  bottom: 80px !important;
+  right: 20px !important;
+  left: auto !important;
+  top: auto !important;
+
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: #6c6cf0;
+  color: white;
+
+  z-index: 9999;
+  contain: layout;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 38px;
+  line-height: 1;
+  padding: 0;
+  transform: none !important;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0.6);
+}
+
+.box{
+  width:92%;
+  max-width:420px;
+  background:#fff;
+  border-radius:22px;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+}
+body.dark .box{background:#1c223a;}
+
+.section{
+  margin-bottom:18px;
+}
+
+/* EDITOR */
+.editor{
+  min-height:140px;
+  padding:14px;
+  border-radius:14px;
+  background:#e0e3ef;
+  margin-top:8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+body.dark .editor{
+  background:#2a3355;
+  color:white;
+}
+
+/* COLORS */
+.colors{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.color{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid transparent;
+}
+.color.active{
+  border:2px solid white;
+}
+
+/* DROPDOWN */
+select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:8px;
+  background:#e0e3ef;
+}
+body.dark select{
+  background:#2a3355;
+  color:white;
+}
+
+/* BUTTONS */
+.buttons{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+.buttons button{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:20px;
+  background:#6366f1;
+  color:white;
+  font-weight:500;
+}
+
+/* CREATE */
+.create-title{
+  text-align:center;
+  margin-bottom:14px;
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+  background:#e6e8f2;
+}
+body.dark .nav{background:#1c223a;}
+
+.nav button{
+  background:none;
+  border:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  color:#444;
+}
+body.dark .nav button{
+  color:#bbb;
+}
+.active{color:#6366f1 !important;}
+
+.dark-btn{
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(145deg,#e6e9f5,#cfd6f6);
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.15),
+              -4px -4px 10px rgba(255,255,255,0.7);
+  font-size:18px;
+}
+
+body.dark .dark-btn{
+  background:linear-gradient(145deg,#1f2747,#2c3560);
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.6),
+              -2px -2px 6px rgba(255,255,255,0.05);
+}
+
+.create-card{
+  position: fixed;
+  bottom: 150px;
+  right: 20px;
+  will-change: transform;
+  width: 260px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 998;
+}
+
+body.dark .create-card{
+  background:#1e2746;
+}
+
+.create-row{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.create-row button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#6c6cf0;
+  color:white;
+}
+
+/* Fix black text in dark mode */
+body.dark .content span[style*="color:black"]{
+  color:white !important;
+}
+
+/* Change black color button to white in dark mode */
+body.dark .color[style*="background:black"]{
+  background:white !important;
+  border:1px solid #aaa;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>Journals</h2>
+  <button class="dark-btn" onclick="toggleDark()">🌙</button>
+</div>
+
+<div id="list"></div>
+
+
+<!-- EDITOR -->
+<div class="modal" id="editorModal">
+  <div class="box">
+
+    <div class="section">
+      <h3>Your Journal</h3>
+      <div id="editor" class="editor" contenteditable="true"></div>
+    </div>
+
+    <div class="section">
+      <div>Colours</div>
+      <div class="colors">
+        <div class="color" style="background:black" onclick="setColor(this,'black')"></div>
+        <div class="color" style="background:grey;border:1px solid #999" onclick="setColor(this,'grey')"></div>
+        <div class="color" style="background:red" onclick="setColor(this,'red')"></div>
+        <div class="color" style="background:blue" onclick="setColor(this,'blue')"></div>
+        <div class="color" style="background:green" onclick="setColor(this,'green')"></div>
+        <div class="color" style="background:purple" onclick="setColor(this,'purple')"></div>
+        <div class="color" style="background:orange" onclick="setColor(this,'orange')"></div>
+        <div class="color" style="background:pink" onclick="setColor(this,'pink')"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div>Your Task</div>
+      <select id="habit"></select>
+    </div>
+
+    <div class="buttons">
+      <button onclick="saveEntry()">Save</button>
+      <button onclick="deleteEntry()">Delete</button>
+      <button onclick="closeEditor()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="location.href='index.html'">
+    <span class="material-icons">home</span>Habits
+  </button>
+
+  <button class="active">
+    <span class="material-icons">notes</span>Journal
+  </button>
+
+  <button onclick="location.href='timer.html'">
+    <span class="material-icons">timer</span>Timer
+  </button>
+</div>
+<div id="createCard" class="create-card">
+  <h3>Create</h3>
+  <div class="create-row">
+    <button onclick="openEditor('note')">Note</button>
+<button onclick="openEditor('bullet')">Bullet</button>
+<button onclick="openEditor('check')">Checklist</button>
+  </div>
+</div>
+
+<button class="fab" id="fabBtn" onclick="toggleCreate()" type="button" aria-label="Create">+</button>
+
+<script>
+
+/* DARK */
+function applyDark(){
+  const isDark = localStorage.getItem("dark")==="true";
+  document.body.classList.toggle("dark", isDark);
+
+  const btn = document.querySelector(".dark-btn");
+  btn.innerText = isDark ? "☀️" : "🌙";
+}
+
+// run on load
+applyDark();
+
+function toggleDark(){
+  const isDark = document.body.classList.contains("dark");
+  localStorage.setItem("dark", !isDark);
+  applyDark();
+}
+
+/* DATA */
+let entries = JSON.parse(localStorage.getItem("journal") || "[]");
+let editIndex = null;
+let currentType = "note";
+let currentColor = "black";
+
+/* HABITS */
+function loadHabits(){
+  const habits = JSON.parse(localStorage.getItem("habits")||"[]");
+  const sel = document.getElementById("habit");
+
+  sel.innerHTML="<option value=''>None</option>";
+  habits.forEach((h,i)=>{
+    sel.innerHTML += `<option value="${i}">${h.name}</option>`;
+  });
+}
+
+/* COLOR */
+function setColor(el,color){
+  document.querySelectorAll(".color").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  currentColor=color;
+}
+function rebindEditorCheckboxes(){
+  const editor = document.getElementById("editor");
+
+  editor.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+    cb.checked = cb.getAttribute("data-checked")==="true";
+
+    cb.addEventListener("change",()=>{
+      cb.setAttribute("data-checked", cb.checked);
+    });
+  });
+}
+
+/* INPUT FIX (stable typing) */
+document.getElementById("editor").addEventListener("input", function(e){
+  const selection = window.getSelection();
+  if(!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+
+  if(e.inputType === "insertText"){
+    const textNode = range.startContainer;
+
+    if(textNode.nodeType === 3){
+      const span = document.createElement("span");
+      span.style.color = currentColor;
+
+      const text = textNode.textContent;
+      const offset = range.startOffset;
+
+      const before = text.slice(0, offset);
+      const char = text.slice(offset - 1, offset);
+      const after = text.slice(offset);
+
+      const parent = textNode.parentNode;
+
+      if(before) parent.insertBefore(document.createTextNode(before), textNode);
+
+      span.textContent = char;
+      parent.insertBefore(span, textNode);
+
+      if(after) parent.insertBefore(document.createTextNode(after), textNode);
+
+      parent.removeChild(textNode);
+
+      const newRange = document.createRange();
+      newRange.setStartAfter(span);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    }
+  }
+});
+
+/* ENTER */
+document.getElementById("editor").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    e.preventDefault();
+
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+
+    let newNode;
+
+    if(currentType === "bullet"){
+      newNode = document.createElement("div");
+      newNode.innerHTML = `•&nbsp;&nbsp;`; // spacing fixed
+    }
+    else if(currentType === "check"){
+      newNode = document.createElement("div");
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.setAttribute("data-checked","false");
+
+      newNode.appendChild(cb);
+      newNode.insertAdjacentHTML("beforeend", "&nbsp;&nbsp;");
+    }
+    else{
+      newNode = document.createElement("div");
+      newNode.innerHTML = "<br>";
+    }
+
+    range.deleteContents();
+    range.insertNode(newNode);
+
+    range.setStart(newNode, newNode.childNodes.length);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    rebindEditorCheckboxes();
+  }
+});
+
+/* CREATE */
+function openEditor(type){
+  currentType = type;
+  editIndex = null;
+
+  document.getElementById("editor").innerHTML = "";
+  document.getElementById("editorModal").style.display = "flex";
+
+  // close create bubble
+  createOpen = false;
+  document.getElementById("createCard").style.display = "none";
+  const card = document.getElementById("createCard");
+
+  // 🔥 HIDE FAB
+  document.getElementById("fabBtn").style.display = "none";
+
+  setTimeout(rebindEditorCheckboxes, 50);
+}
+
+/* TIME */
+function formatTime(){
+  let d=new Date();
+  return d.toLocaleDateString()+", "+
+         d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+/* SAVE */
+function saveEntry(){
+
+  const editor = document.getElementById("editor");
+
+  // 🔥 IMPORTANT: sync checkbox states before saving
+  editor.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+    cb.setAttribute("data-checked", cb.checked);
+  });
+
+  // sync checkbox state properly BEFORE saving
+editor.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+  cb.setAttribute("data-checked", cb.checked);
+});
+
+const content = editor.innerHTML;
+  const habit = document.getElementById("habit").value;
+
+  const now = new Date();
+  const time = now.toLocaleString([],{
+    day:'numeric',
+    month:'numeric',
+    year:'numeric',
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+
+  if(editIndex !== null){
+    entries[editIndex].content = content;
+    entries[editIndex].habit = habit;
+    entries[editIndex].time = time;
+  } else {
+    entries.unshift({
+      content,
+      habit,
+      type: currentType,
+      time
+    });
+  }
+
+  localStorage.setItem("journal", JSON.stringify(entries));
+
+  closeEditor();
+  render();
+}
+
+/* DELETE */
+function deleteEntry(){
+  if(editIndex!==null){
+    entries.splice(editIndex,1);
+    localStorage.setItem("journal",JSON.stringify(entries));
+    closeEditor();
+    render();
+  }
+}
+
+/* CLOSE */
+function closeEditor(){
+  document.getElementById("editorModal").style.display = "none";
+
+  // 🔥 SHOW FAB BACK
+  document.getElementById("fabBtn").style.display = "flex";
+}
+
+/* RENDER */
+function render(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const habits = JSON.parse(localStorage.getItem("habits") || "[]");
+
+  entries.forEach((e, i) => {
+
+    let div = document.createElement("div");
+    div.className = "entry";
+
+    let content = document.createElement("div");
+    content.className = "content";
+    content.innerHTML = e.content;
+
+    // ✅ FIX: checkbox sync
+    content.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+
+  const saved = cb.getAttribute("data-checked");
+  cb.checked = saved === "true";
+
+  cb.onchange = (ev)=>{
+    ev.stopPropagation();
+
+    cb.setAttribute("data-checked", cb.checked);
+
+    // 🔥 SAVE immediately
+    entries[i].content = content.innerHTML;
+    localStorage.setItem("journal", JSON.stringify(entries));
+  };
+
+});
+
+    div.appendChild(content);
+
+    // open editor (not checkbox)
+    div.addEventListener("click", (ev) => {
+      if(ev.target.type === "checkbox") return;
+
+      editIndex = i;
+      currentType = e.type;
+
+      document.getElementById("editor").innerHTML = e.content;
+rebindEditorCheckboxes();
+
+function rebindEditorCheckboxes(){
+  const editor = document.getElementById("editor");
+
+  editor.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+    cb.checked = cb.getAttribute("data-checked")==="true";
+
+    cb.onchange = ()=>{
+      cb.setAttribute("data-checked", cb.checked);
+    };
+  });
+}
+      document.getElementById("habit").value = e.habit;
+
+      document.getElementById("editorModal").style.display = "flex";
+      document.getElementById("fabBtn").style.display = "none";
+    });
+    rebindEditorCheckboxes();
+
+    // meta
+    let meta = document.createElement("div");
+    meta.className = "meta";
+
+    let task = document.createElement("div");
+    task.className = "task";
+
+    let time = document.createElement("div");
+    time.className = "time";
+
+    if(e.habit !== ""){
+      task.innerText = habits[e.habit]?.name;
+      task.style.background = habits[e.habit]?.color;
+    } else {
       task.innerText = "No Habit";
       task.style.background = "#888";
     }
@@ -687,6 +1349,31 @@ window.addEventListener("load", () => {
   const habitIndex = localStorage.getItem("journalHabitIndex");
 
   if(shouldOpen === "true"){
+
+    // open editor as NOTE
+    openEditor("note");
+
+    // wait for dropdown to load
+    setTimeout(()=>{
+      if(habitIndex !== null){
+        document.getElementById("habit").value = habitIndex;
+      }
+    }, 100);
+
+    // clear flags
+    localStorage.removeItem("openJournalEditor");
+    localStorage.removeItem("journalHabitIndex");
+  }
+
+});
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("SW registered"))
+    .catch(err => console.log("SW error", err));
+}
+</script>
+</body>
+</html>true"){
 
     // open editor as NOTE
     openEditor("note");
