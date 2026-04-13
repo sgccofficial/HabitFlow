@@ -405,10 +405,17 @@ function rebindEditorCheckboxes(){
 }
 
 /* INPUT */
-document.getElementById("editor").addEventListener("beforeinput",function(e){
+document.getElementById("editor").addEventListener("beforeinput", function(e){
+
+  // ✅ allow space (FIXES KEYBOARD BUG)
+  if(e.data === " " || e.data === null) return;
+
   if(e.data && e.inputType === "insertText"){
     e.preventDefault();
-    document.execCommand("insertHTML",false,
+
+    document.execCommand(
+      "insertHTML",
+      false,
       `<span style="color:${currentColor}">${e.data}</span>`
     );
   }
