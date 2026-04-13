@@ -1,34 +1,33 @@
 {
   "name": "HabitFlow",
   "short_name": "HabFlow",
-  "description": "Track habits, maintain streaks, journal your progress, and stay consistent every day.",
+  "description": "Track habits, build streaks, journal progress, and stay consistent daily.",
   "start_url": "./index.html",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#020617",
   "theme_color": "#6366f1",
   "orientation": "portrait",
-  "display_override": ["standalone", "minimal-ui"],
+  "categories": ["productivity", "lifestyle"],
 
   "icons": [
     {
-      "src": "image-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "image-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "image-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-
-  "categories": ["productivity", "lifestyle"],
 
   "shortcuts": [
     {
@@ -42,6 +41,24 @@
     {
       "name": "Start Timer",
       "url": "./timer.html"
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
+    },
+    {
+      "src": "screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
+    },
+    {
+      "src": "screenshot3.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
     }
   ]
 }
