@@ -6,8 +6,8 @@ const urlsToCache = [
   "journal.html",
   "timer.html",
   "manifest.json",
-  "icon-192.png",
-  "icon-512.png"
+  "image-192.png",
+  "image-512.png"
 ];
 
 self.addEventListener("install", event => {
