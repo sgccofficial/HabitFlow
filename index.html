@@ -689,34 +689,46 @@ if ("serviceWorker" in navigator) {
     .catch(err => console.log("SW error", err));
 }
 </script>
-  <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
   authDomain: "hab-flow.firebaseapp.com",
   projectId: "hab-flow",
-  storageBucket: "hab-flow.appspot.com",
   messagingSenderId: "132980995414",
-  appId: "1:132980995414:web:xxxx"
+  appId: "1:132980995414:web:8e6fb46389cf0a384852f7"
 };
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// ask permission
-Notification.requestPermission().then(permission => {
-  if(permission === "granted"){
-    getToken(messaging, {
-      vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK208CpDN74Z1PdXkVGuxNsHAuku8zZNo"
-    }).then(token => {
+async function initPush() {
+  try {
+    const swReg = await navigator.serviceWorker.register("/HabitFlow/firebase-messaging-sw.js");
+
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK208CpDN74Z1PdXkVGuxNsHAuku8zZNo",
+        serviceWorkerRegistration: swReg
+      });
+
       console.log("TOKEN:", token);
-    });
+    } else {
+      console.log("Permission denied");
+    }
+  } catch (err) {
+    console.log("Push error:", err);
   }
-});
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+}
+
+initPush();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>
   eruda.init();
 </script>
