@@ -2,6 +2,12 @@ import express from "express";
 import admin from "firebase-admin";
 
 const app = express();
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST");
+  next();
+});
 app.use(express.json());
 
 // Load from ENV (not file)
