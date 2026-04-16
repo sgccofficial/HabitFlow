@@ -10,6 +10,26 @@ const urlsToCache = [
   "image-512.png"
 ];
 
+importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
+
+firebase.initializeApp({
+  messagingSenderId: "132980995414"
+});
+
+const messaging = firebase.messaging();
+
+// Background handler (Firebase style)
+messaging.onBackgroundMessage(function(payload) {
+  const title = payload.notification?.title || "HabitFlow";
+  const options = {
+    body: payload.notification?.body || "New update",
+    icon: "image-192.png"
+  };
+
+  self.registration.showNotification(title, options);
+});
+
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
