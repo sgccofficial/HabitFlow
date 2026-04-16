@@ -703,6 +703,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
+  import { onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+onMessage(messaging, (payload) => {
+  console.log("Foreground message:", payload);
+
+  new Notification(payload.notification.title, {
+    body: payload.notification.body
+  });
+});
 
 async function initPush() {
   try {
