@@ -1,6 +1,8 @@
 import express from "express";
 import admin from "firebase-admin";
 
+const express = require("express");
+const cors = require("cors");
 const app = express();
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -8,6 +10,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "GET,POST");
   next();
 });
+app.use(cors());
 app.use(express.json());
 
 // Load from ENV (not file)
