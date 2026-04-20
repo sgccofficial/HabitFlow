@@ -375,7 +375,11 @@ button:active{
 </div>
 
 <script>
+let isAppActive = true;
 
+document.addEventListener("visibilitychange", () => {
+  isAppActive = document.visibilityState === "visible";
+});
 /* THEME */
 function toggleDark(){
   document.body.classList.toggle("dark");
@@ -451,6 +455,7 @@ function updateSW(){
 let total=0, left=0, tmi=null;
 const C=628;
 let endTime = null;
+  let pushTimeout = null;
 
 function startTM(){
   if ("Notification" in window && Notification.permission !== "granted") {
@@ -472,9 +477,33 @@ function startTM(){
     localStorage.setItem("timerTotal", total);
   }
   notify("Timer Started !!", "Your timer is running...");
-  tmi = setInterval(updateFromTime, 250);
-  updateFromTime();
+
+// 🔥 Prevent duplicate scheduling
+if (pushTimeout) clearTimeout(pushTimeout);
+
+// 🔥 Accurate delay
+const delay = endTime - Date.now();
+
+// 🔥 Only schedule if valid
+if (delay > 0) {
+  pushTimeout = setTimeout(() => {
+    if (!isAppActive) {
+      fetch("https://habitflow-server-2jca.onrender.com/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: "Time’s Up ⏰",
+          body: "You should be done by now 😉"
+        })
+      });
+    }
+  }, delay);
 }
+
+tmi = setInterval(updateFromTime, 250);
+updateFromTime();
 
 function updateFromTime(){
   let end = parseInt(localStorage.getItem("timerEnd"));
@@ -622,7 +651,9 @@ function finish(){
   finishText.innerText=task+" Completed ?";
   finishModal.style.display="flex";
   vibrate();
+  if (isAppActive) {
   notify("Time’s Up ⏰", task + " should be completed by now 😉");
+}
 }
 
 function markDone(){
