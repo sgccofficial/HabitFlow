@@ -375,11 +375,6 @@ button:active{
 </div>
 
 <script>
-let isAppActive = true;
-
-document.addEventListener("visibilitychange", () => {
-  isAppActive = document.visibilityState === "visible";
-});
 /* THEME */
 function toggleDark(){
   document.body.classList.toggle("dark");
@@ -487,7 +482,7 @@ const delay = endTime - Date.now();
 // 🔥 Only schedule if valid
 if (delay > 0) {
   pushTimeout = setTimeout(() => {
-    if (!isAppActive) {
+    if (document.visibilityState !== "visible") {
       fetch("https://habitflow-server-2jca.onrender.com/send", {
         method: "POST",
         headers: {
@@ -501,9 +496,9 @@ if (delay > 0) {
     }
   }, delay);
 }
-
 tmi = setInterval(updateFromTime, 250);
 updateFromTime();
+}
 
 function updateFromTime(){
   let end = parseInt(localStorage.getItem("timerEnd"));
@@ -553,6 +548,27 @@ function pauseTM(){
   endTime = Date.now() + remaining * 1000;
 
   localStorage.setItem("timerEnd", endTime);
+  // 🔥 reschedule push after pause
+if (pushTimeout) clearTimeout(pushTimeout);
+
+const delay = endTime - Date.now();
+
+if (delay > 0) {
+  pushTimeout = setTimeout(() => {
+    if (document.visibilityState !== "visible") {
+      fetch("https://habitflow-server-2jca.onrender.com/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: "Time’s Up ⏰",
+          body: "You should be done by now 😉"
+        })
+      });
+    }
+  }, delay);
+}
 }
 
 function resetTM(){
@@ -568,6 +584,10 @@ function resetTM(){
 
   tmDisplay.innerText = "00:00";
   ring.style.strokeDashoffset = 0;
+  if (pushTimeout) {
+  clearTimeout(pushTimeout);
+  pushTimeout = null;
+  }
 }
 
 /* 🔥 VIBRATION FIXED: 3 TIMES */
@@ -648,11 +668,16 @@ if(savedEnd){
 /* FINISH */
 function finish(){
   let task = taskSelect.options[taskSelect.selectedIndex].text || "Session";
-  finishText.innerText=task+" Completed ?";
-  finishModal.style.display="flex";
+  finishText.innerText = task + " Completed ?";
+  finishModal.style.display = "flex";
   vibrate();
-  if (isAppActive) {
-  notify("Time’s Up ⏰", task + " should be completed by now 😉");
+
+  if (document.visibilityState === "visible") {
+    notify("Time’s Up ⏰", task + " should be completed by now 😉");
+  }
+  if (pushTimeout) {
+  clearTimeout(pushTimeout);
+  pushTimeout = null;
 }
 }
 
