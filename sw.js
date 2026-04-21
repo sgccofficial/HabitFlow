@@ -9,6 +9,18 @@ const urlsToCache = [
   "image-192.png",
   "image-512.png"
 ];
+importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
+
+firebase.initializeApp({
+  apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
+  authDomain: "hab-flow.firebaseapp.com",
+  projectId: "hab-flow",
+  messagingSenderId: "132980995414",
+  appId: "1:132980995414:web:8e6fb46389cf0a384852f7"
+});
+
+const messaging = firebase.messaging();
 
 // INSTALL
 self.addEventListener("install", event => {
@@ -47,22 +59,5 @@ self.addEventListener("fetch", event => {
         });
       });
     })
-  );
-});
-
-// 🔔 PUSH (only this is needed)
-self.addEventListener("push", event => {
-  if (!event.data) return;
-
-  const data = event.data.json();
-
-  const title = data.notification?.title || "HabitFlow";
-  const options = {
-    body: data.notification?.body || "New message",
-    icon: "image-192.png"
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
   );
 });
