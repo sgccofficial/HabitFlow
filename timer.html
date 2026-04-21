@@ -396,7 +396,7 @@ let fcmToken = null;
     if (permission !== "granted") return;
 
     fcmToken = await getToken(messaging, {
-      vapidKey: "YOUR_PUBLIC_VAPID_KEY"
+      vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo"
     });
 
     console.log("FCM TOKEN:", fcmToken);
@@ -514,10 +514,10 @@ const delay = endTime - Date.now();
 // 🔥 Only schedule if valid
 if (delay > 0) {
   pushTimeout = setTimeout(() => {
-    if (!fcmToken) {
-  console.log("Token not ready yet");
+  if (!fcmToken) {
+  alert("FCM not ready. Wait a moment and try again.");
   return;
-    }
+}
     if (document.visibilityState !== "visible") {
       fetch("https://habitflow-server-2jca.onrender.com/send", {
         method: "POST",
