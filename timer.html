@@ -375,11 +375,11 @@ button:active{
 </div>
 
 <script>
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-  import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+//  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+// import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+ // import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
+// const firebaseConfig = {
   apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
   authDomain: "hab-flow.firebaseapp.com",
   projectId: "hab-flow",
@@ -387,11 +387,11 @@ const firebaseConfig = {
   appId: "1:132980995414:web:8e6fb46389cf0a384852f7"
 };
 
-const app = initializeApp(firebaseConfig);
+//const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
   const db = getFirestore(app);
 
-window.fcmToken = null;
+//window.fcmToken = null;
   async function initFCM() {
   try {
     const permission = await Notification.requestPermission();
@@ -408,7 +408,7 @@ const registration = await navigator.serviceWorker.register("sw.js");
   }
 }
 
-initFCM();
+//initFCM();
   let taskSelect, minInput, secInput, tmDisplay, ring;
 
 document.addEventListener("DOMContentLoaded", () => {
