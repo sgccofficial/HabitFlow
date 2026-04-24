@@ -394,9 +394,10 @@ window.fcmToken = null;
   try {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return;
-
+const registration = await navigator.serviceWorker.register("sw.js");
     window.fcmToken = await getToken(messaging, {
-  vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo"
+  vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo",
+      serviceWorkerRegistration: registration
 });
     console.log("FCM TOKEN:", window.fcmToken);
 
@@ -774,12 +775,7 @@ function pad(n){
 
 updateSW();
 updateTM();
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js")
-    .then(() => console.log("SW registered"))
-    .catch(err => console.log("SW error", err));
-}
-</script>
 
+</script>
 </body>
 </html>
