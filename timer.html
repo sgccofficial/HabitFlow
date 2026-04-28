@@ -373,9 +373,42 @@ button:active{
   </div>
 
 </div>
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
 <script>
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
+  authDomain: "hab-flow.firebaseapp.com",
+  projectId: "hab-flow",
+  messagingSenderId: "132980995414",
+  appId: "1:132980995414:web:8e6fb46389cf0a384852f7"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const messaging = firebase.messaging();
+const db = firebase.firestore();
+
+window.fcmToken = null;
+
+async function initFCM(){
+  const permission = await Notification.requestPermission();
+  if(permission !== "granted") return;
+
+  const token = await messaging.getToken({
+    vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo"
+  });
+
+  window.fcmToken = token;
+  console.log("FCM TOKEN:", token);
+}
+
+initFCM();
+  let taskSelect, minInput, secInput, tmDisplay, ring;
+  
 /* THEME */
 function toggleDark(){
   document.body.classList.toggle("dark");
@@ -453,9 +486,7 @@ const C=628;
 let endTime = null;
 
 function startTM(){
-  if ("Notification" in window && Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
+  
   if(tmi) return;
 
   let m = parseInt(minInput.value) || 0;
@@ -471,7 +502,14 @@ function startTM(){
     localStorage.setItem("timerEnd", endTime);
     localStorage.setItem("timerTotal", total);
   }
-  notify("Timer Started !!", "Your timer is running...");
+if(window.fcmToken){
+  db.collection("timers").add({
+    token: window.fcmToken,
+    endTime: endTime,
+    sent: false,
+    task: taskSelect.value || "Session"
+  });
+}
   tmi = setInterval(updateFromTime, 250);
   updateFromTime();
 }
@@ -552,14 +590,8 @@ function vibrate(){
     navigator.vibrate(0);
   }
   }
-  function notify(title, body){
-  if(Notification.permission === "granted"){
-    new Notification(title, {
-      body: body
-    });
-  }
-}
 
+  
 /* Bottom Menu */
 function goHome(){
   window.location.href = "index.html";
@@ -583,9 +615,13 @@ function loadTasks(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-if ("Notification" in window) {
-  Notification.requestPermission();
-}
+
+  taskSelect = document.getElementById("taskSelect");
+  minInput = document.getElementById("minInput");
+  secInput = document.getElementById("secInput");
+  tmDisplay = document.getElementById("tmDisplay");
+  ring = document.getElementById("ring");
+
   // 1. Load tasks first
   loadTasks();
 
@@ -622,7 +658,6 @@ function finish(){
   finishText.innerText=task+" Completed ?";
   finishModal.style.display="flex";
   vibrate();
-  notify("Time’s Up ⏰", task + " should be completed by now 😉");
 }
 
 function markDone(){
