@@ -486,7 +486,10 @@ const C=628;
 let endTime = null;
 
 function startTM(){
-  
+  if(!window.fcmToken){
+  alert("Notification system not ready yet");
+  return;
+  }
   if(tmi) return;
 
   let m = parseInt(minInput.value) || 0;
@@ -502,14 +505,18 @@ function startTM(){
     localStorage.setItem("timerEnd", endTime);
     localStorage.setItem("timerTotal", total);
   }
-if(window.fcmToken){
+const taskName = taskSelect
+  ? taskSelect.options[taskSelect.selectedIndex].text
+  : "Session";
+
+if(window.fcmToken && endTime){
   db.collection("timers").add({
     token: window.fcmToken,
     endTime: endTime,
     sent: false,
-    task: taskSelect.value || "Session"
+    task: taskName
   });
-}
+  }
   tmi = setInterval(updateFromTime, 250);
   updateFromTime();
 }
@@ -654,7 +661,9 @@ if(savedEnd){
 
 /* FINISH */
 function finish(){
-  let task = taskSelect.options[taskSelect.selectedIndex].text || "Session";
+  const task = taskSelect
+  ? taskSelect.options[taskSelect.selectedIndex].text
+  : "Session";
   finishText.innerText=task+" Completed ?";
   finishModal.style.display="flex";
   vibrate();
