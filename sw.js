@@ -1,4 +1,4 @@
-const CACHE_NAME = "habitflow-v2";
+const CACHE_NAME = "habitflow-v1";
 
 const urlsToCache = [
   "./",
@@ -9,6 +9,8 @@ const urlsToCache = [
   "image-192.png",
   "image-512.png"
 ];
+
+/* 🔥 FIREBASE */
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
 
@@ -22,7 +24,7 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// INSTALL
+/* 🔥 INSTALL */
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
@@ -30,7 +32,7 @@ self.addEventListener("install", event => {
   );
 });
 
-// ACTIVATE
+/* 🔥 ACTIVATE */
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -46,7 +48,7 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// FETCH
+/* 🔥 FETCH */
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(cached => {
@@ -54,10 +56,47 @@ self.addEventListener("fetch", event => {
 
       return fetch(event.request).then(response => {
         return caches.open("habitflow-runtime").then(cache => {
-          cache.put(event.request, response.clone());
+
+          if (
+            event.request.method === "GET" &&
+            response.status === 200 &&
+            event.request.url.startsWith("http")
+          ) {
+            cache.put(event.request, response.clone());
+          }
+
           return response;
         });
       });
     })
+  );
+});
+
+/* 🔥 BACKGROUND NOTIFICATION */
+messaging.onBackgroundMessage((payload) => {
+
+  const title =
+    payload.notification?.title ||
+    payload.data?.title ||
+    "Time’s Up ⏰";
+
+  const options = {
+    body:
+      payload.notification?.body ||
+      payload.data?.body ||
+      "Session completed",
+    icon: "image-192.png",
+    tag: "timer-alert"
+  };
+
+  self.registration.showNotification(title, options);
+});
+
+/* 🔥 CLICK ACTION */
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.openWindow("timer.html")
   );
 });
