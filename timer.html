@@ -486,10 +486,6 @@ const C=628;
 let endTime = null;
 
 function startTM(){
-  if(!window.fcmToken){
-  alert("Notification system not ready yet");
-  return;
-  }
   if(tmi) return;
 
   let m = parseInt(minInput.value) || 0;
