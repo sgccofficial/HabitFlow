@@ -536,7 +536,7 @@ function startTM(){
     if(Notification.permission === "granted"){
   navigator.serviceWorker.ready.then(reg => {
     reg.showNotification("Timer Started", {
-      body: `${taskName} has started`,
+      body: `${taskName} has started...`,
       icon: "image-512.png"
     });
   });
