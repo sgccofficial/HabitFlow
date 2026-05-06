@@ -424,16 +424,19 @@ async function initFCM(){
   window.fcmToken = token;
   localStorage.setItem("fcmToken", token);
   }
-
-document.addEventListener("DOMContentLoaded", async () => {
-  if(Notification.permission === "default"){
-    await initFCM();
-  }
-});
   
-function startWithFCM(){
-  startTM();
+async function startWithFCM(){
+  if(!window.fcmToken){
+    try{
+      await initFCM();
+    }catch(err){
+      console.error("FCM init failed:", err);
+      return;
+    }
   }
+
+  startTM();
+}
   
   let taskSelect, minInput, secInput, tmDisplay, ring;
   
