@@ -411,11 +411,15 @@ async function initFCM(){
   });
 
   console.log("TOKEN:", token);
-
+  
   if(!token){
     console.error("Token NULL");
     return;
   }
+
+  await db.collection("tokens").doc(token).set({
+  createdAt: Date.now()
+  });
 
   window.fcmToken = token;
   localStorage.setItem("fcmToken", token);
