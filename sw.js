@@ -75,7 +75,11 @@ self.addEventListener("fetch", event => {
 /* Background Notifications */
 self.addEventListener("push", event => {
 
-  const data = event.data?.json();
+  let data = {};
+
+  if(event.data){
+    data = event.data.json();
+  }
 
   const title =
     data.notification?.title ||
