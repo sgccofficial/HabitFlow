@@ -391,7 +391,6 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 const db = firebase.firestore();
-  
 window.fcmToken = localStorage.getItem("fcmToken");
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js")
