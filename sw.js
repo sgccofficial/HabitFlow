@@ -73,30 +73,23 @@ self.addEventListener("fetch", event => {
 });
 
 /* Background Notifications */
-self.addEventListener("push", event => {
-
-  let data = {};
-
-  if(event.data){
-    data = event.data.json();
-  }
+messaging.onBackgroundMessage((payload) => {
 
   const title =
-    data.notification?.title ||
-    "Timer Done ⏰";
+    payload.notification?.title ||
+    payload.data?.title ||
+    "Time’s Up ⏰";
 
   const options = {
     body:
-      data.notification?.body ||
+      payload.notification?.body ||
+      payload.data?.body ||
       "Session completed",
-    icon: "/image-512.png",
+    icon: "image-512.png",
     tag: "timer-alert"
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-
+  self.registration.showNotification(title, options);
 });
 
 /* 🔥 CLICK ACTION */
