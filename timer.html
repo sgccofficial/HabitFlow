@@ -536,32 +536,29 @@ function startTM(){
 
     localStorage.setItem("timerEnd", endTime);
     localStorage.setItem("timerTotal", total);
- if(Notification.permission === "granted"){
+    if(Notification.permission === "granted"){
   navigator.serviceWorker.ready.then(reg => {
     reg.showNotification("Timer Started", {
       body: `${taskName} has started...`,
       icon: "image-512.png"
     });
   });
-  }
-     left = total;
-updateTM();
-  updateFromTime();
-tmi = setInterval(updateFromTime, 250);
-  
+    }
     if(window.fcmToken && endTime){
-      
   db.collection("timers").add({
     token: window.fcmToken,
     endTime: endTime,
     sent: false,
     task: taskName
-  }).catch(err => {
-    console.log("Firestore Failed:", err);
   });
-
     }
   }
+
+  left = total;
+updateTM();
+  updateFromTime();
+tmi = setInterval(updateFromTime, 250);
+}
 
 function updateFromTime(){
   let end = parseInt(localStorage.getItem("timerEnd"));
