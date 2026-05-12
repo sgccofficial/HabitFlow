@@ -310,6 +310,9 @@ button {
     <p>Task Name</p>
     <input id="nameInput">
 
+    <p>Reminder Time</p>
+    <input type="time" id="reminderInput">
+
     <p>Colour</p>
     <div class="grid" id="colorGrid"></div>
 
@@ -382,7 +385,8 @@ function normalize(h){
     dates:h.dates||[],
     created:h.created||format(new Date()),
     color:h.color||"#6a11cb",
-    icon:h.icon || "self_improvement"
+    icon:h.icon || "self_improvement",
+    reminderTime: h.reminderTime || ""
   };
 }
 habits = habits.map(normalize);
@@ -430,6 +434,7 @@ function openCustom(i){
 
   document.getElementById("customModal").style.display="flex";
   document.getElementById("nameInput").value=h.name;
+  document.getElementById("reminderInput").value = h.reminderTime || "";
 
   updateSelections();
 }
@@ -437,6 +442,7 @@ function openCustom(i){
 function saveCustom(){
   let h=habits[editIndex];
   h.name=document.getElementById("nameInput").value.slice(0,25) || h.name;
+  h.reminderTime = document.getElementById("reminderInput").value;
   save(); closeCustom(); render();
 }
 
