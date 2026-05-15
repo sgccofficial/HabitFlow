@@ -706,14 +706,78 @@ if ("serviceWorker" in navigator) {
     .then(() => console.log("SW registered"))
     .catch(err => console.log("SW error", err));
 }
-</script>
+async function requestNotifPermission(){
+
+  if(Notification.permission !== "granted"){
+    await Notification.requestPermission();
+  }
+
+}
+
+requestNotifPermission();
+
+function checkHabitReminders(){
+
+  const now = new Date();
+
+  const currentTime =
+    now.getHours().toString().padStart(2,"0")
+    + ":" +
+    now.getMinutes().toString().padStart(2,"0");
+
+  const today =
+    now.toISOString().split("T")[0];
+
+  habits.forEach(habit => {
+
+    if(!habit.reminderTime) return;
+
+    // already completed today
+    if(habit.dates.includes(today)) return;
+
+    // prevent duplicate notification
+    const lastReminder =
+      localStorage.getItem(
+        "lastReminder_" + habit.id
+      );
+
+    if(
+      habit.reminderTime <= currentTime &&
+      lastReminder !== today
+    ){
+
+      navigator.serviceWorker.ready.then(reg => {
+
+        reg.showNotification(
+          "Habit Reminder",
+          {
+            body: `Time for ${habit.name}`,
+            icon: "image-192.png",
+            badge: "image-192.png"
+          }
+        );
+
+      });
+
+      localStorage.setItem(
+        "lastReminder_" + habit.id,
+        today
+      );
+
+    }
+
+  });
+
+}
+
+// run every 60 sec
+setInterval(checkHabitReminders, 60000);
+
+// run immediately
+checkHabitReminders();
+</script> 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getMessaging,
   getToken,
@@ -729,7 +793,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const messaging = getMessaging(app);
 
 // ✅ Foreground messages
@@ -760,7 +823,6 @@ async function initPush() {
 
       console.log("TOKEN:", token);
       localStorage.setItem("fcmToken", token);
-      await syncHabitReminders();
     } else {
       console.log("Permission denied");
     }
@@ -771,52 +833,6 @@ async function initPush() {
 
 initPush();
   
-  async function syncHabitReminders(){
-const token =
-    localStorage.getItem("fcmToken");
-
-  if(!token) return;
-  const today =
-    new Date().toISOString().split("T")[0];
-
-  for(const habit of habits){
-    if(!habit.id){
-      habit.id = crypto.randomUUID();
-    }
-
-    await setDoc(
-
-      doc(db, "habitReminders", habit.id),
-
-      {
-
-        token: token,
-
-        habitName: habit.name,
-
-        reminderTime:
-          habit.reminderTime || "",
-
-        streak:
-          streak(habit.dates),
-
-        doneToday:
-          habit.dates.includes(today)
-
-      }
-
-    );
-
-  }
-localStorage.setItem(
-    "habits",
-    JSON.stringify(habits)
-  );
-  console.log("Habit reminders synced");
-
-  }
-  window.syncHabitReminders =
-  syncHabitReminders;
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
