@@ -30,21 +30,6 @@
     }
   ],
 
-  "shortcuts": [
-    {
-      "name": "Add Habit",
-      "url": "./index.html"
-    },
-    {
-      "name": "Open Journal",
-      "url": "./journal.html"
-    },
-    {
-      "name": "Start Timer",
-      "url": "./timer.html"
-    }
-  ],
-
   "screenshots": [
     {
       "src": "screenshot1.png",
